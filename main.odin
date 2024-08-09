@@ -80,16 +80,106 @@ complete_instruction :: proc(instruction: u16) {
 	// 2nnn CALL addr
 	case 0x2:
 		jp_addr_instr(instruction_addr)
+	// 3xkk SE Vx, byte
 	case 0x3:
 		se_vx_byte_instr(instruction_vx, instruction_byte)
+	// SNE Vx, byte
 	case 0x4:
 		sne_vx_byte_instr(instruction_vx, instruction_byte)
+	// 5xy0 SE Vx, Vy
 	case 0x5:
 		se_vx_vy_instr(instruction_vx, instruction_vy)
+	// 6xkk LD Vx, byte
 	case 0x6:
 		ld_vx_byte_instr(instruction_vx, instruction_byte)
+	// 7xkk ADD Vx, byte
 	case 0x7:
 		add_vx_byte_instr(instruction_vx, instruction_byte)
+	case 0x8:
+		switch nibble_four {
+		// 8xy0 LD Vx, Vy
+		case 0x0:
+			ld_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xy1 OR Vx, VY
+		case 0x1:
+			or_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xy2 AND Vx, Vy
+		case 0x2:
+			and_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xy3 XOR Vx, Vy
+		case 0x3:
+			xor_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xy4 ADD Vx, Vy
+		case 0x4:
+			add_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xy5 SUB Vx, Vy
+		case 0x5:
+			sub_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xy6 SHR Vx, Vy
+		case 0x6:
+			shr_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xy7 SUBN Vx, Vy
+		case 0x7:
+			subn_vx_vy_instr(instruction_vx, instruction_vy)
+		// 8xyE SHL Vx {, Vy}
+		case 0xE:
+			shl_vx_vy_instr(instruction_vx, instruction_vy)
+		}
+	case 0x9:
+		// 9xy0 SNE Vx, Vy
+		sne_vx_byte_instr(instruction_vx, instruction_vy)
+	case 0xA:
+		// Annn LD I, addr
+		ld_i_addr_instr(instruction_addr)
+	case 0xB:
+		// Bnnn JP V0, addr
+		jp_v0_addr_instr(instruction_addr)
+	case 0xC:
+		// Cxkk RND Vx, byte
+		rnd_vx_byte_instr(instruction_vx, instruction_byte)
+	case 0xD:
+		// Dxyn DRW Vx, Vy, nibble
+		drw_vx_vy_nibble_instr(instruction_vx, instruction_vy, u8(nibble_four))
+	case 0xE:
+		switch {
+		// Ex9E SKP Vx
+		case nibble_three == 0x9 && nibble_four == 0xE:
+			skp_vx_instr(instruction_vx)
+		// ExA1 SKNP Vx
+		case nibble_three == 0xA && nibble_four == 0x1:
+			sknp_vx_instr(instruction_vx)
+		}
+
+	case 0xF:
+		switch {
+		// Fx07 LD Vx, DT
+		case nibble_three == 0x0 && nibble_four == 0x7:
+			ld_vx_dt_instr(instruction_vx)
+		// Fx0A LD Vx, K
+		case nibble_three == 0x0 && nibble_four == 0xA:
+			ld_vx_k_instr(instruction_vx)
+		// Fx15 LD DT, Vx
+		case nibble_three == 0x1 && nibble_four == 0x5:
+			ld_dt_vx_instr(instruction_vx)
+		// Fx18 LD ST, Vx
+		case nibble_three == 0x1 && nibble_four == 0x8:
+			ld_st_vx_instr(instruction_vx)
+		// Fx1E ADD I, Vx
+		case nibble_three == 0x1 && nibble_four == 0xE:
+			add_i_vx_instr(instruction_vx)
+		// Fx29 LD F, Vx
+		case nibble_three == 0x2 && nibble_four == 0x9:
+			ld_f_vx_instr(instruction_vx)
+		// Fx33 LD B, Vx
+		case nibble_three == 0x3 && nibble_four == 0x3:
+			ld_b_vx_instr(instruction_vx)
+		// Fx55 LD [I], Vx
+		case nibble_three == 0x5 && nibble_four == 0x5:
+			ld_i_vx_instr(instruction_vx)
+		// Fx65 LD Vx, [I]
+		case nibble_three == 0x6 && nibble_four == 0x5:
+			ld_vx_i_instr(instruction_vx)
+		}
 	}
 }
 
@@ -109,7 +199,7 @@ jp_addr_instr :: proc(addr: u16) {
 
 }
 
-call_instr :: proc(addr: u16) {
+call_addr_instr :: proc(addr: u16) {
 
 }
 
@@ -137,15 +227,15 @@ ld_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-or_instr :: proc(register_x, register_y: u8) {
+or_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-and_instr :: proc(register_x, register_y: u8) {
+and_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-xor_instr :: proc(register_x, register_y: u8) {
+xor_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
@@ -153,19 +243,19 @@ add_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-sub_instr :: proc(register_x, register_y: u8) {
+sub_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-shr_instr :: proc(register_x, register_y: u8) {
+shr_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-subn_instr :: proc(register_x, register_y: u8) {
+subn_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-shl_instr :: proc(register_x, register_y: u8) {
+shl_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
@@ -173,27 +263,27 @@ sne_vx_vy_instr :: proc(register_x, register_y: u8) {
 
 }
 
-ld_instr :: proc(addr: u16) {
+ld_i_addr_instr :: proc(addr: u16) {
 
 }
 
-jp_v0_instr :: proc(addr: u16) {
+jp_v0_addr_instr :: proc(addr: u16) {
 
 }
 
-rnd_instr :: proc(register, byte: u8) {
+rnd_vx_byte_instr :: proc(register, byte: u8) {
 
 }
 
-drw_instr :: proc(register_x, register_y, nibble: u8) {
+drw_vx_vy_nibble_instr :: proc(register_x, register_y, nibble: u8) {
 
 }
 
-skp_instr :: proc(register: u8) {
+skp_vx_instr :: proc(register: u8) {
 
 }
 
-sknp_instr :: proc(register: u8) {
+sknp_vx_instr :: proc(register: u8) {
 
 }
 
@@ -201,7 +291,7 @@ ld_vx_dt_instr :: proc(register: u8) {
 
 }
 
-ld_k_instr :: proc(register: u8) {
+ld_vx_k_instr :: proc(register: u8) {
 
 }
 
@@ -282,7 +372,7 @@ main :: proc() {
 	stack: [STACK_SIZE]u16
 
 	delay_timer: u8 = 0
-	sound_timer: u8 = 255
+	sound_timer: u8 = 0
 
 	rl.InitAudioDevice()
 	defer rl.CloseAudioDevice()
